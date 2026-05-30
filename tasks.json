@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "description": "创建项目目录结构（src, config, k8s, sql, proto, tests等）",
+    "status": "completed"
+  },
+  {
+    "id": 2,
+    "description": "创建 package.json 及项目配置文件",
+    "status": "completed"
+  },
+  {
+    "id": 3,
+    "description": "创建 GameComponent 核心服务入口 (src/app.js)",
+    "status": "completed"
+  },
+  {
+    "id": 4,
+    "description": "创建 Game 数据模型与数据库层 (src/models/, sql/)",
+    "status": "completed"
+  },
+  {
+    "id": 5,
+    "description": "创建 Game 路由与控制器 (src/routes/, src/controllers/)",
+    "status": "completed"
+  },
+  {
+    "id": 6,
+    "description": "创建游戏逻辑核心服务 (src/services/gameService.js)",
+    "status": "completed"
+  },
+  {
+    "id": 7,
+    "description": "创建 Redis 缓存与 RabbitMQ 消息中间件层",
+    "status": "completed"
+  },
+  {
+    "id": 8,
+    "description": "创建 OpenAPI 文档、protobuf 定义与 API 测试",
+    "status": "completed"
+  },
+  {
+    "id": 9,
+    "description": "创建 Kubernetes 部署清单与 Dockerfile",
+    "status": "completed"
+  },
+  {
+    "id": 10,
+    "description": "创建单元测试与集成测试",
+    "status": "completed"
+  },
+  {
+    "id": 11,
+    "description": "创建 .env 示例与项目 README",
+    "status": "completed"
+  }
+]

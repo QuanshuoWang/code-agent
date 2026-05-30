@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package spacefractions;
+
+// ─── Game Service ────────────────────────────────────────
+// Internal gRPC service definition for inter-component
+// communication (GameComponent <-> QuestionComponent).
+
+service GameService {
+  // Play a game session
+  rpc Play(PlayRequest) returns (PlayResponse) {}
+
+  // Get current game state
+  rpc GetGameState(GetGameStateRequest) returns (GetGameStateResponse) {}
+
+  // Submit an answer for validation
+  rpc SubmitAnswer(SubmitAnswerRequest) returns (SubmitAnswerResponse) {}
+}
+
+// ─── Messages ────────────────────────────────────────────
+
+message PlayRequest {
+  string gameId = 1;
+  string userId = 2;
+}
+
+message PlayResponse {
+  string gameId = 1;
+  string status = 2;
+  int32 score = 3;
+  GameState gameState = 4;
+}
+
+message GetGameStateRequest {
+  string gameId = 1;
+}
+
+message GetGameStateResponse {
+  string gameId = 1;
+  string status = 2;
+  int32 score = 3;
+  int32 totalQuestions = 4;
+  int32 correctAnswers = 5;
+  GameState gameState = 6;
+  string startedAt = 7;
+  string completedAt = 8;
+}
+
+message SubmitAnswerRequest {
+  string gameId = 1;
+  string questionId = 2;
+  string answer = 3;
+  int32 timeSpent = 4;
+}
+
+message SubmitAnswerResponse {
+  bool correct = 1;
+  int32 newScore = 2;
+  bool isGameOver = 3;
+  GameState updatedState = 4;
+}
+
+message GameState {
+  int32 currentQuestionIndex = 1;
+  int32 lives = 2;
+  int32 streak = 3;
+  repeated AnsweredQuestion answeredQuestions = 4;
+}
+
+message AnsweredQuestion {
+  string questionId = 1;
+  bool correct = 2;
+  int32 timeSpent = 3;
+}
