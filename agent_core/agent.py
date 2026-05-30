@@ -1,7 +1,7 @@
 import json
 import os
 import copy
-from langfuse.openai import OpenAI
+from openai import OpenAI
 
 from .schemas import TOOLS
 from .tools import (
