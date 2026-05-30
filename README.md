@@ -1,0 +1,82 @@
+🚀 CodeAgent CLI
+
+一个基于 DeepSeek 构建的生产级自主编码 Agent 框架。
+通过 主从 Agent 隔离架构，极大解决了大模型在复杂软件工程中常见的“格式滑坡 (Chatty Bias)”、“无休止测试循环 (Runaway)”以及“上下文污染”等痛点。
+
+✨ 核心特性 (Key Features)
+
+🐣 动态子节点委派 (Sub-Agent Delegation)
+面对低耦合的分支任务（如独立脚本编写、数据解析），主 Agent 可随时剥离出独立的子 Agent。子 Agent 拥有全新的上下文记忆，执行完毕后仅返回摘要。从底层代码阻断了嵌套循环套娃的死锁风险。
+
+📋 智能任务看板 (Task Board)
+内置基于 tasks.json 的敏捷任务管理系统。遇到复杂需求时自动拆解步骤。当任务大盘全绿 (Completed) 时，系统会实施强制硬件拦截，杜绝 Agent 的“过度执行/强迫症测试”。并在每次新会话前自动归档历史任务板。
+
+🗜️ 无损记忆压缩 (Memory Compression)
+自带上下文超载监控。当历史记忆 Token 逼近极限时，自动触发内部“压缩器”，将沉长的试错记录折叠为极简的“项目状态机快照”，确保 Agent 在超大型项目中依然保持清醒。
+
+🛠️ 全套本地工程工具
+自带 create_file、edit_file (精准局部替换)、search_text、run_shell 等一套完备的本地文件与环境操作工具链。
+
+📦 快速开始 (Quick Start)
+
+1. 环境准备
+
+确保你的机器上安装了 Python 3.10+。克隆本项目后，安装必要的依赖：
+
+git clone https://github.com/your-username/CodeAgent-CLI.git
+cd CodeAgent-CLI
+pip install langfuse openai python-dotenv
+
+
+2. 配置环境变量
+
+在项目根目录创建一个 .env 文件，并填入你的 DeepSeek API Key（或兼容 OpenAI 接口格式的其他模型 API Key）：
+
+DEEPSEEK_API_KEY=sk-your_api_key_here
+
+
+3. 准备架构文档
+
+为了让 Agent 深入理解你的项目，启动前请在根目录提供两份上下文文件（如果没有，可创建空文件或示例文件）：
+
+Architecture_Documentation.json：全局架构与规范说明
+
+Architecture_View.md：系统的 UML 或视图文档
+
+4. 运行 Agent
+
+python main.py
+
+
+启动后，直接在控制台输入你的自然语言指令，例如：“请帮我根据架构文档中的定义，在 src/components 下构建一个 UserAuth 组件，并为其编写单元测试。”
+
+🧠 架构揭秘：为什么它如此稳定？
+
+在开发自主 Agent 时，最大的挑战并不是让它写代码，而是如何控制它停下来以及如何保证输出格式不错乱。本框架采用了以下先进策略：
+
+掐断闲聊 (Anti-Chatty Bias)：利用 match...case 路由和拦截器，一旦发现模型企图输出普通文本，立即打回并提示强制使用工具。
+
+状态全绿监控：主循环实时监听 manage_tasks。当任务节点全部完成时，系统会在下一次工具回传中注入“系统最高指令”，强迫大模型立即调用 finish_task 退出，彻底根治无限 run_shell 测试的顽疾。
+
+隔离的运行时：子 Agent (is_sub_agent=True) 被深拷贝了严格限制的工具链（移除了自我繁殖能力），确保它只做纯粹的执行者。
+
+📂 核心文件目录
+
+.
+├── main.py            # CLI 入口，处理用户交互与任务归档调度
+├── agent_core/
+│   ├── agent.py       # 核心引擎 CodeAgent，管理对话循环与记忆流
+│   ├── schemas.py     # 工具链的 JSON Schema 定义
+│   └── tools.py       # 本地文件/Shell/任务状态管理的具体 Python 实现
+└── .env               # 环境变量 (需手动创建)
+
+
+🤝 贡献与定制
+
+该框架极度易于扩展！你可以随时在 tools.py 中编写自己的 Python 函数（比如：爬虫工具、数据库查询工具、Git 操作工具），然后在 schemas.py 中注册其 Schema，Agent 就会立即掌握这项新能力！
+
+欢迎提交 Pull Request 或建立 Issue 探讨更多 Agent 工程化落地的奇思妙想。
+
+📄 License
+
+MIT License
