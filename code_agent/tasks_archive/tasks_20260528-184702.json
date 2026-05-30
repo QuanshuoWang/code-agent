@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "description": "创建项目目录结构（GameComponent 相关文件夹）",
+    "status": "completed"
+  },
+  {
+    "id": 2,
+    "description": "创建 package.json 和基础配置文件",
+    "status": "completed"
+  },
+  {
+    "id": 3,
+    "description": "创建 Express 应用入口 app.js",
+    "status": "completed"
+  },
+  {
+    "id": 4,
+    "description": "创建 Game 模型和游戏逻辑",
+    "status": "completed"
+  },
+  {
+    "id": 5,
+    "description": "创建 Question 模型",
+    "status": "completed"
+  },
+  {
+    "id": 6,
+    "description": "创建 User 模型",
+    "status": "completed"
+  },
+  {
+    "id": 7,
+    "description": "创建游戏路由和控制器",
+    "status": "completed"
+  },
+  {
+    "id": 8,
+    "description": "创建数据库迁移脚本（SQL DDL）",
+    "status": "completed"
+  },
+  {
+    "id": 9,
+    "description": "创建 OpenAPI 规范文件",
+    "status": "completed"
+  },
+  {
+    "id": 10,
+    "description": "创建 Dockerfile 和 Kubernetes 部署配置",
+    "status": "completed"
+  },
+  {
+    "id": 11,
+    "description": "创建单元测试和集成测试",
+    "status": "completed"
+  }
+]

@@ -1,0 +1,427 @@
+openapi: 3.0.0
+info:
+  title: Space Fractions Game API
+  description: |
+    API for the Space Fractions GameComponent.
+    Manages game sessions, state, scoring, and user interaction.
+  version: 1.0.0
+  contact:
+    name: Space Fractions Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:3001/api/v1
+    description: Local development server
+  - url: https://api.spacefractions.example.com/api/v1
+    description: Production server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Game:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique game identifier
+        userId:
+          type: string
+          format: uuid
+          description: Owner of the game
+        status:
+          type: string
+          enum: [created, playing, paused, completed, abandoned]
+        score:
+          type: integer
+          minimum: 0
+        totalQuestions:
+          type: integer
+          minimum: 0
+        correctAnswers:
+          type: integer
+          minimum: 0
+        accuracy:
+          type: number
+          format: float
+          description: Percentage of correct answers
+        isActive:
+          type: boolean
+        duration:
+          type: integer
+          description: Duration in seconds
+        gameState:
+          type: object
+          properties:
+            currentQuestionIndex:
+              type: integer
+            answeredQuestions:
+              type: array
+              items:
+                type: object
+                properties:
+                  questionId:
+                    type: string
+                  correct:
+                    type: boolean
+                  timeSpent:
+                    type: number
+            lives:
+              type: integer
+            streak:
+              type: integer
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    GameList:
+      type: object
+      properties:
+        games:
+          type: array
+          items:
+            $ref: '#/components/schemas/Game'
+        count:
+          type: integer
+
+    UserStats:
+      type: object
+      properties:
+        totalGames:
+          type: integer
+        completedGames:
+          type: integer
+        avgScore:
+          type: number
+          format: float
+        bestScore:
+          type: integer
+        totalQuestionsAnswered:
+          type: integer
+        totalCorrectAnswers:
+          type: integer
+        overallAccuracy:
+          type: integer
+
+    SubmitAnswerRequest:
+      type: object
+      required:
+        - questionId
+        - answer
+      properties:
+        questionId:
+          type: string
+          description: The ID of the question being answered
+        answer:
+          oneOf:
+            - type: string
+            - type: number
+            - type: array
+              items:
+                type: string
+          description: The user's answer
+        timeSpent:
+          type: number
+          description: Seconds spent on the question
+
+    SubmitAnswerResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            game:
+              $ref: '#/components/schemas/Game'
+            correct:
+              type: boolean
+            isGameOver:
+              type: boolean
+
+    UpdateGameStateRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [playing, paused, abandoned]
+        gameState:
+          type: object
+
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        statusCode:
+          type: integer
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+paths:
+  /games:
+    post:
+      summary: Start a new game
+      description: Creates and starts a new game session for the authenticated user.
+      tags: [Games]
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Game created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      game:
+                        $ref: '#/components/schemas/Game'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /games/active:
+    get:
+      summary: Get active games
+      description: Returns all active (playing or paused) games for the current user.
+      tags: [Games]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of active games
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GameList'
+
+  /games/recent:
+    get:
+      summary: Get recent games
+      description: Returns the most recent completed games for the current user.
+      tags: [Games]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+          description: Number of games to return
+      responses:
+        '200':
+          description: List of recent games
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GameList'
+
+  /games/stats:
+    get:
+      summary: Get user statistics
+      description: Returns aggregate game statistics for the current user.
+      tags: [Games]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/UserStats'
+
+  /games/{id}:
+    get:
+      summary: Get game by ID
+      description: Returns a specific game session by its ID.
+      tags: [Games]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Game data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      game:
+                        $ref: '#/components/schemas/Game'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /games/{id}/submit:
+    post:
+      summary: Submit an answer
+      description: Submits a user's answer for a question in an active game.
+      tags: [Games]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitAnswerRequest'
+      responses:
+        '200':
+          description: Answer processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitAnswerResponse'
+        '400':
+          description: Bad request or game not in playing state
+
+  /games/{id}/state:
+    patch:
+      summary: Update game state
+      description: Pause, resume, or abandon a game.
+      tags: [Games]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGameStateRequest'
+      responses:
+        '200':
+          description: Game state updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      game:
+                        $ref: '#/components/schemas/Game'
+
+  /games/{id}/complete:
+    post:
+      summary: Complete a game
+      description: Manually marks a game as completed.
+      tags: [Games]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Game completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      game:
+                        $ref: '#/components/schemas/Game'
